@@ -1,0 +1,77 @@
+🔌 Hardware Wiring Guide
+
+This document details every connection in the LPC2148 Morse Code Generator project.
+
+  1. I2C LCD Display Interface
+
+    We use the PCF8574 I/O Expander to drive the LCD. This setup requires only two signal wires plus power.
+
+    LPC P0.2 (SCL): Connect this to Pin 15 on the PCF8574.
+
+    ⚠️ Important: You must connect a 4.7kΩ Resistor from this line to VCC (+3.3V).
+
+    LPC P0.3 (SDA): Connect this to Pin 14 on the PCF8574.
+
+    ⚠️ Important: You must connect a 4.7kΩ Resistor from this line to VCC (+3.3V).
+
+    Address Pins: Connect pins A0, A1, and A2 (Pins 1, 2, 3) directly to Ground. This sets the I2C address to 0x40.
+
+    I2C is an "Open Drain" protocol. The chip can pull the line Low (0V) but cannot push it High. The resistors are required to pull the line up to 3.3V when no data is being sent. Without them, the screen will remain blank.
+
+  2. 4x4 Keypad Matrix
+
+    The keypad uses a scanning algorithm involving 4 Output Rows and 4 Input Columns.
+
+    Row Connections (Outputs)
+
+    LPC P1.16: Connect to Row A
+
+    LPC P1.17: Connect to Row B
+
+    LPC P1.18: Connect to Row C
+
+    LPC P1.19: Connect to Row D
+
+    Column Connections (Inputs)
+
+    LPC P1.20: Connect to Column 1
+
+    LPC P1.21: Connect to Column 2
+
+    LPC P1.22: Connect to Column 3
+
+    LPC P1.23: Connect to Column 4
+
+    ⚠️ The Critical Pull-Down Resistors
+
+    You MUST connect a 10kΩ Resistor between EACH Column pin and Ground.
+
+    P1.20 -> 10kΩ Resistor -> GND
+
+    P1.21 -> 10kΩ Resistor -> GND
+
+    (Repeat for P1.22 and P1.23)
+
+    Input pins must never be left "floating". If a button is not pressed, the wire is disconnected. These resistors gently pull the voltage to 0V (Ground) so the microcontroller reads a clean "0". When you press a button, the signal overpowers the resistor and reads "1".
+
+  3. Audio Output (Buzzer Driver)
+
+    The LPC2148 pins are too weak to power a buzzer directly. We use a BC547 Transistor as a switch.
+
+    Signal: Connect LPC P0.10 to a 10kΩ Resistor, and connect the other end of the resistor to the Base (Middle Pin) of the Transistor.
+
+    Power: Connect the Buzzer Positive (+) pin to VCC (+5V).
+
+    Switching: Connect the Buzzer Negative (-) pin to the Collector of the Transistor.
+
+    Ground: Connect the Emitter of the Transistor directly to Ground.
+
+     The transistor acts like a gate. When the LPC sends a signal, it opens the gate, allowing high current to flow from the power supply directly through the buzzer to ground.
+
+  4. System Basics
+
+    Crystal: Connect a 12MHz Crystal between XTAL1 and XTAL2 pins (with 22pF capacitors to Ground).
+
+    Power: Connect all VDD pins to +3.3V.
+
+    Ground: Connect all VSS pins to Ground.
